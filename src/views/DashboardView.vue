@@ -20,6 +20,26 @@
         </div>
     </div>
 
+
+     <!-- CUSTOMER EDIT MODAL -->
+     <div v-show="edit_customer_modal" class=" fixed top-0 left-0 bg-black w-full min-h-screen z-50 backdrop-blur-sm  bg-opacity-50 flex justify-center items-center p-5">
+        <div class=" max-w-[700px] bg-white rounded-lg flex flex-col gap-3 p-8 w-full">
+          <h1 class=" font-bold text-2xl">Edit Customer Information</h1>
+            <div class=" flex flex-col mt-6">
+                <span>Customer name</span>
+                <input type="text" placeholder="your company name here" class=" p-3 border bg-gray-50 rounded-md uppercase" v-model="customer.name"/>
+            </div>
+            <div class=" flex flex-col">
+                <span>Current balance</span>
+                <input type="text" placeholder="your company name here" class=" p-3 border bg-gray-50 rounded-md uppercase" v-model="customer.balance"/>
+            </div>
+            <div class="flex flex-row gap-3 justify-end items-center">
+            <Button variant="destructive" @click="[edit_customer_modal = !edit_customer_modal, error = '']">Close</Button>
+            <Button @click="updateCustomer(customer.id)">Save changes</Button>
+          </div>
+        </div>
+    </div>
+
     <!-- DEPOSIT MODAL -->
     <div v-show="deposit_modal" class=" fixed top-0 left-0 bg-black w-full min-h-screen z-50 backdrop-blur-sm  bg-opacity-50 flex justify-center items-center p-5">
         <div class=" w-400px bg-white rounded-lg flex flex-col gap-3 p-8">
@@ -86,7 +106,7 @@
           </form>
   
           <div class="flex flex-row gap-3 justify-end items-center">
-            <Button variant="destructive" @click="[deposit_modal = !deposit_modal, erro = '']">Close</Button>
+            <Button variant="destructive" @click="[deposit_modal = !deposit_modal, error = '']">Close</Button>
             <Button @click="newDepositTransaction(customer.id, 'deposit')">Add Deposit</Button>
           </div>
         </div>
@@ -291,9 +311,9 @@
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem>Edit customer</DropdownMenuItem>
+                      <DropdownMenuItem @click="[edit_customer_modal = !edit_customer_modal, customer.id = item.id, customer.name = item.name, customer.balance = item.balance]">Edit customer</DropdownMenuItem>
                       <DropdownMenuItem @click="[withdrawal_modal = !withdrawal_modal, customer.id = item.id]">Withdraw funds</DropdownMenuItem>
-                      <DropdownMenuItem class="bg-red-500 text-white">Delete customer</DropdownMenuItem>
+                      <!-- <DropdownMenuItem class="bg-red-500 text-white">Delete customer</DropdownMenuItem> -->
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -448,16 +468,64 @@
           new_customer_modal: false,
           registration_modal: false,
 
+          edit_customer_modal: false,
+
 
   
         }
       },
       methods: {
+        updateCustomer(customerId) {
+          // const customerId = "1234567890"; // Replace with the actual customer ID
+          const updatedInfo = {
+            name: this.customer.name,    // Update the name
+            balance: this.customer.balance,           // Update the balance
+            // Add any other fields you want to update
+          };
+
+          const success = this.editCustomer(customerId, updatedInfo);
+          if (success) {
+            console.log("Customer updated successfully!");
+            this.loadCustomers(); // Refresh the customer list if needed
+          } else {
+            console.error("Failed to update customer");
+          };
+
+          this.edit_customer_modal = false;
+        },
+
+        editCustomer(customerId, updatedInfo) {
+          // Retrieve existing customers from localStorage
+          const customers = JSON.parse(localStorage.getItem("customers")) || [];
+          
+          // Find the customer by ID
+          const customerIndex = customers.findIndex(customer => customer.id === customerId);
+          
+          if (customerIndex === -1) {
+            console.error("Customer not found");
+            return false; // Return false if the customer is not found
+          }
+          
+          // Update the customer information
+          customers[customerIndex] = {
+            ...customers[customerIndex], // Preserve existing properties
+            ...updatedInfo,             // Overwrite with updated properties
+          };
+          
+          // Save updated customers back to localStorage
+          localStorage.setItem("customers", JSON.stringify(customers));
+          
+          console.log("Customer updated:", customers[customerIndex]);
+          return true; // Return true if the operation was successful
+        },
+
         loadUSerData(){
             const user = JSON.parse(localStorage.getItem("finance_app_user")) || {name: '', company_name: ''};
             this.user = user;
             if(!user.name || !user.company_name){
                 this.registration_modal = true;
+            } else {
+              this.registration_modal = false;
             }
         },
         setUserDetails(){
