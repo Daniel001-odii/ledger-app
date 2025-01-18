@@ -377,7 +377,7 @@
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem @click="[edit_customer_modal = !edit_customer_modal, customer.id = item.id, customer.name = item.name, customer.balance = item.balance]">Edit customer</DropdownMenuItem>
+                      <DropdownMenuItem @click="[edit_customer_modal = !edit_customer_modal, customer = item]">Edit customer</DropdownMenuItem>
                       <DropdownMenuItem @click="[withdrawal_modal = !withdrawal_modal, customer.id = item.id]">Withdraw funds</DropdownMenuItem>
                       <DropdownMenuItem  @click="[delete_customer_modal = !delete_customer_modal, customer.id = item.id, customer.name = item.name]" class="bg-red-500 text-white">Delete customer</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -580,11 +580,7 @@
 
         updateCustomer(customerId) {
           // const customerId = "1234567890"; // Replace with the actual customer ID
-          const updatedInfo = {
-            name: this.customer.name,    // Update the name
-            balance: this.customer.balance,           // Update the balance
-            // Add any other fields you want to update
-          };
+          const updatedInfo = this.customer;
 
           const success = this.editCustomer(customerId, updatedInfo);
           if (success) {
