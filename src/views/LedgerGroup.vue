@@ -51,7 +51,26 @@
 </template>
 
 <script>
+  import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from '@/components/ui/table'
+
     export default {
+        components: {
+            Table,
+        TableBody,
+        TableCaption,
+        TableCell,
+        TableHead,
+        TableHeader,
+        TableRow,
+        },
         data(){
             return{
                 customers: ''
