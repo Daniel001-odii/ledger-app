@@ -37,10 +37,13 @@
                 </div>
             </div>
 
-            <div class=" w-full">
-              <span>Customer Address</span>
-              <input type="text" placeholder="Enter customer address" class="p-3 w-full uppercase" v-model="customer.address"/>
-            </div>
+            <div class=" w-full flex flex-col">
+                <span>Customer Address</span>
+                <select v-model="customer.address" class=" p-3 border uppercase">
+                  <option value="" disabled>Select Address</option>
+                  <option v-for="item in address">{{ item }}</option>
+                </select>
+              </div>
 
             <div class=" w-full">
               <span>Customer Phone Number</span>
@@ -203,9 +206,12 @@
               </div>
             </div>
 
-              <div class=" w-full">
+            <div class=" w-full flex flex-col">
                 <span>Customer Address</span>
-                <input type="text" placeholder="Enter customer address" class="p-3 w-full uppercase" v-model="customer.address"/>
+                <select v-model="customer.address" class=" p-3 border uppercase">
+                  <option value="" disabled>Select Address</option>
+                  <option v-for="item in address">{{ item }}</option>
+                </select>
               </div>
 
               <div class=" w-full">
@@ -494,6 +500,13 @@
                 name: '',
                 company_name: ''
             },
+            address: [
+              "school road",
+              "high-life",
+              "Clifford",
+              "adazi",
+              "ngwa-road"
+            ],
           deposit_modal: false,
           MagnifyingGlassIcon,
           cn,
