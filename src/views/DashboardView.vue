@@ -25,19 +25,43 @@
      <div v-show="edit_customer_modal" class=" fixed top-0 left-0 bg-black w-full min-h-screen z-50 backdrop-blur-sm  bg-opacity-50 flex justify-center items-center p-5">
         <div class=" max-w-[700px] bg-white rounded-lg flex flex-col gap-3 p-8 w-full">
           <h1 class=" font-bold text-2xl">Edit Customer Information</h1>
-            <div class=" flex flex-col mt-6">
-                <span>Customer name</span>
-                <input type="text" placeholder="your company name here" class=" p-3 border bg-gray-50 rounded-md uppercase" v-model="customer.name"/>
+            <div class=" flex flex-row gap-3">
+                <div class=" w-full flex-1">
+                  <span>Customer name</span>
+                  <input type="text" placeholder="Enter customer name here" class="p-3 w-full uppercase border" v-model="customer.name"/>
+                </div>
+
+                <div class=" flex flex-col">
+                  <span>Reg. Number</span>
+                  <input type="text" placeholder="Enter customer REG. number" class="p-3 uppercase w-[100px]" v-model="customer.reg_number"/>
+                </div>
             </div>
-            <div class=" flex flex-col">
-                <span>Current balance</span>
-                <input type="text" placeholder="your company name here" class=" p-3 border bg-gray-50 rounded-md uppercase" v-model="customer.balance"/>
+
+            <div class=" w-full">
+              <span>Customer Address</span>
+              <input type="text" placeholder="Enter customer address" class="p-3 w-full uppercase" v-model="customer.address"/>
+            </div>
+
+            <div class=" w-full">
+              <span>Customer Phone Number</span>
+              <input type="phone" placeholder="Enter customer phone number" class="p-3 w-full uppercase" v-model="customer.phone"/>
             </div>
             <div class="flex flex-row gap-3 justify-end items-center">
             <Button variant="destructive" @click="[edit_customer_modal = !edit_customer_modal, error = '']">Close</Button>
             <Button @click="updateCustomer(customer.id)">Save changes</Button>
           </div>
         </div>
+    </div>
+
+       <!-- DELTE CUSTOMER MODAL -->
+    <div v-show="delete_customer_modal" class=" fixed top-0 left-0 bg-black w-full min-h-screen z-50 backdrop-blur-sm  bg-opacity-50 flex justify-center items-center p-5">
+      <div class=" max-w-[700px] bg-white rounded-lg flex flex-col gap-3 p-8 w-full">
+        <h1 class=" font-bold text-2xl">Are your sure you want to delete {{ customer.name }} </h1>
+          <div class="flex flex-row gap-3 justify-end items-center">
+          <Button variant="destructive" @click="[delete_customer_modal = !delete_customer_modal, error = '']">Close</Button>
+          <Button @click="[deleteCustomer(customer.id), delete_customer_modal = !delete_customer_modal]">Yes Delete</Button>
+        </div>
+      </div>
     </div>
 
     <!-- DEPOSIT MODAL -->
@@ -58,6 +82,7 @@
           <!-- FORM -->
           <form class=" flex flex-col gap-3 w-full" @submit.prevent="addNewCustomer">
             <span>Search for a customer by name</span>
+            {{ date_of_deposit }}
               <!-- SELECT CUSTOMER -->
               <Popover v-model:open="open">
                 <PopoverTrigger as-child>
@@ -102,6 +127,11 @@
               <div class=" flex flex-col">
                   <span>Amount deposited</span>
                   <input type="number" placeholder="NGN 500,000" class="p-3" v-model="amount"/>
+              </div>
+
+              <div class=" flex flex-col">
+                  <span>Date of deposit</span>
+                  <input type="date" placeholder="NGN 500,000" class="p-3" v-model="date_of_deposit"/>
               </div>
           </form>
   
@@ -159,10 +189,33 @@
           </Alert>
   
           <!-- FORM -->
-          <form class=" flex flex-row w-full" @submit.prevent="addNewCustomer">
-              <div class=" w-full">
+          <form class=" flex flex-col w-full gap-3" @submit.prevent="addNewCustomer">
+            <!-- {{ customer }} -->
+            <div class=" flex flex-row gap-3">
+              <div class=" w-full flex-1">
                 <span>Customer name</span>
-                <input type="text" placeholder="OBASI JAMES ORJI" class="p-3 w-full uppercase" v-model="customer.name"/>
+                <input type="text" placeholder="Enter customer name here" class="p-3 w-full uppercase border" v-model="customer.name"/>
+              </div>
+
+              <div class=" flex flex-col">
+                <span>Reg. Number</span>
+                <input type="text" placeholder="Enter customer REG. number" class="p-3 uppercase w-[100px]" v-model="customer.reg_number"/>
+              </div>
+            </div>
+
+              <div class=" w-full">
+                <span>Customer Address</span>
+                <input type="text" placeholder="Enter customer address" class="p-3 w-full uppercase" v-model="customer.address"/>
+              </div>
+
+              <div class=" w-full">
+                <span>Customer Phone Number</span>
+                <input type="phone" placeholder="Enter customer phone number" class="p-3 w-full uppercase" v-model="customer.phone"/>
+              </div>
+
+              <div class=" w-full">
+                <span>Customer Regsitration Date</span>
+                <input type="date" placeholder="Enter customer phone number" class="p-3 w-full uppercase" v-model="customer.reg_date"/>
               </div>
           </form>
   
@@ -219,8 +272,6 @@
         <div class=" flex flex-col mt-12 gap-3">
           <h2 class=" font-bold">Actions</h2>
           <div class=" flex flex-row flex-wrap gap-3">
-  
-  
             <!-- ADD NEW CUSTOMER -->
             <Button @click="new_customer_modal = !new_customer_modal"> <i class="bi bi-person"></i> Add new customer</Button>
   
@@ -231,6 +282,17 @@
             
           </div>
         </div>
+
+        <!-- LEDGER GROUPS -->
+        <div class=" flex flex-col mt-12 gap-3">
+          <h2 class=" font-bold">All Ledger Groups</h2>
+          <div class=" flex flex-row flex-wrap gap-3">
+            <RouterLink :to="`/group/${group}`" v-for="group in  getAllRegNumberGroups()">
+              <Button >{{ group }}</Button>
+            </RouterLink>
+          </div>
+        </div>
+        <!-- Ledger Groups - {{ }} -->
   
   
         <!-- SEARCH AREA -->
@@ -273,6 +335,7 @@
                   S/N
                 </TableHead>
                 <TableHead class=" text-left border">Name</TableHead>
+                <TableHead class=" text-left border">Reg.No</TableHead>
                 <TableHead v-for="(day, dayIndex) in days" :key="dayIndex" class="text-right border">{{ day }}</TableHead>
                 <TableHead class=" text-right border">W/D</TableHead>
                 <TableHead class=" text-right border">W/D</TableHead>
@@ -288,6 +351,9 @@
                     <router-link :to="`/customers/${item.id}`" class=" hover:underline hover:text-blue-500">
                         {{ item.name }}
                     </router-link>
+                </TableCell>
+                <TableCell class="font-left border">
+                  {{ item.reg_number }}
                 </TableCell>
   
                 <!-- Loop through weekdays and align transactions -->
@@ -313,7 +379,7 @@
                     <DropdownMenuContent>
                       <DropdownMenuItem @click="[edit_customer_modal = !edit_customer_modal, customer.id = item.id, customer.name = item.name, customer.balance = item.balance]">Edit customer</DropdownMenuItem>
                       <DropdownMenuItem @click="[withdrawal_modal = !withdrawal_modal, customer.id = item.id]">Withdraw funds</DropdownMenuItem>
-                      <!-- <DropdownMenuItem class="bg-red-500 text-white">Delete customer</DropdownMenuItem> -->
+                      <DropdownMenuItem  @click="[delete_customer_modal = !delete_customer_modal, customer.id = item.id, customer.name = item.name]" class="bg-red-500 text-white">Delete customer</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -441,6 +507,12 @@
             id: '',
             name: '',
             balance: 0,
+
+            reg_number: '',
+            address: '',
+            phone: '',
+            reg_date: new Date().toISOString(),
+
             transaction: [
               {
                 type: '',
@@ -469,12 +541,43 @@
           registration_modal: false,
 
           edit_customer_modal: false,
+          delete_customer_modal: false,
+          new_amount: '',
+          transaction_id: '',
+
+          date_of_deposit: '',
 
 
   
         }
       },
       methods: {
+       
+
+
+        deleteCustomer(customerId) {
+          // Retrieve existing customers from localStorage
+          const customers = JSON.parse(localStorage.getItem("customers")) || [];
+
+          // Find the customer index
+          const customerIndex = customers.findIndex(customer => customer.id === customerId);
+
+          if (customerIndex === -1) {
+            console.error("Customer not found");
+            return false; // Return false if the customer doesn't exist
+          }
+
+          // Remove the customer from the array
+          customers.splice(customerIndex, 1);
+
+          // Save updated customers back to localStorage
+          localStorage.setItem("customers", JSON.stringify(customers));
+
+          console.log(`Customer with ID ${customerId} deleted successfully.`);
+          this.loadCustomers();
+          return true; // Return true to indicate success
+        },
+
         updateCustomer(customerId) {
           // const customerId = "1234567890"; // Replace with the actual customer ID
           const updatedInfo = {
@@ -528,6 +631,7 @@
               this.registration_modal = false;
             }
         },
+
         setUserDetails(){
             const user = this.user;
             localStorage.setItem("finance_app_user", JSON.stringify(user));
@@ -567,6 +671,7 @@
             print_window.print();
             print_window.close();
         },
+
         getCurrentDayIndex() {
           // Get today's day index (Monday = 0, ..., Friday = 4)
           const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -649,6 +754,10 @@
           const newCustomer = {
             id: Date.now().toString(),
             name: trimmedName,
+            reg_number: this.customer.reg_number,
+            address: this.customer.address,
+            phone: this.customer.phone,
+            reg_date: this.customer.reg_date,
             balance: 0,
             transactions: [],
           };
@@ -656,11 +765,22 @@
           customers.push(newCustomer);
           localStorage.setItem("customers", JSON.stringify(customers));
           this.loadCustomers();
+
+          // check for customer and create new ledger reg no
+         /*  checkListLengthAndCallFunction(customers, (()=>{
+            this.customer.reg_number = ``
+          })); */
   
           console.log("New customer added:", newCustomer);
           this.error = null; // Clear any previous error messages
         },
-  
+
+        checkListLengthAndCallFunction(list, callback) {
+            if (list.length % 20 === 0 && list.length > 0) {
+                callback(); // Call the function when the condition is met
+            }
+        },
+          
   
         getWeekNumber(date) {
           const currentDate = new Date(date);
@@ -682,11 +802,21 @@
   
            // Initialize transactions array if not already present
           customer.transactions = customer.transactions || [];
+
+          // create new transaction...
+          const transaction = {
+            id: Date.now().toString(),
+            type: "deposit",
+            amount: this.amount,
+            date: this.date_of_deposit,
+            week: this.getWeekNumber(new Date()),
+          };
   
           // Check if a transaction of the same type already exists for today
           const hasTransactionToday = customer.transactions.some(
-            (t) => t.type === "deposit" && t.date.split("T")[0] === today
+            (t) => t.type === "deposit" && t.date === transaction.date
           );
+
   
           if (hasTransactionToday) {
             // throw new Error(`A ${type} transaction has already been made today.`);
@@ -694,13 +824,7 @@
             return null
           }
   
-          const transaction = {
-            id: Date.now().toString(),
-            type: "deposit",
-            amount: this.amount,
-            date: new Date().toISOString(),
-            week: this.getWeekNumber(new Date()),
-          };
+          
   
           customer.balance += this.amount;
   
@@ -794,6 +918,21 @@
             totalBalance,  // Total balance across all customers
           }; */
         },
+
+        getAllRegNumberGroups() {
+                const customers = JSON.parse(localStorage.getItem("customers")) || [];
+                const groups = new Set();
+
+                customers.forEach((customer) => {
+                    if (customer.reg_number) {
+                        const group = customer.reg_number.charAt(0); // Get the first character of the reg_number
+                        groups.add(group);
+                    }
+                });
+
+                return Array.from(groups).sort(); // Return sorted groups (e.g., ["A", "B", "C"])
+            },
+
   
       },
   
@@ -852,8 +991,12 @@
     }
   </script>
   
-  <style scoped>
+  <style>
   .stat_box{
     @apply flex flex-row gap-5 font-bold uppercase rounded-lg border p-5 flex-1 items-center
+  }
+
+  input{
+    @apply border rounded-md p-3
   }
   </style>

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import CustomerRecord from '@/views/CustomerRecord.vue'
 import DashboardView from '@/views/DashboardView.vue'
 
-
+import LedgerGroup from '@/views/LedgerGroup.vue'
 
 const routes = [
   {
@@ -15,6 +15,11 @@ const routes = [
     name: 'home',
     component: CustomerRecord
   },
+  {
+    path: '/group/:group',
+    name: 'Ledger Group',
+    component: LedgerGroup,
+  }
 ]
 
 const router = createRouter({
