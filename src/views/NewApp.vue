@@ -48,6 +48,7 @@
       </div>
     </div>
     <customer-table :customers="customers" />
+    <input type="file" @change="uploadToLocalStorage" accept=".json" />
     <Button @click="saveLocalStorageToFile">Download File</Button>
  
   </div>
@@ -150,6 +151,41 @@ export default {
       // Step 5: Clean up the link
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+    },
+
+    async uploadToLocalStorage(event) {
+      const file = event.target.files[0]; // Get the uploaded file
+
+      if (file) {
+        try {
+          // Step 1: Read the file content
+          const fileContent = await this.readFile(file);
+
+          // Step 2: Parse the JSON data
+          const data = JSON.parse(fileContent);
+
+          // Step 3: Save each key-value pair to localStorage
+          Object.keys(data).forEach((key) => {
+            localStorage.setItem(key, data[key]);
+          });
+
+          alert("Data has been successfully restored to localStorage!");
+          window.location.reload();
+        } catch (error) {
+          console.error("Error reading or parsing the file:", error);
+          alert("Failed to upload and restore data. Please check the file format.");
+        }
+      }
+    },
+
+    // Helper method to read the file using FileReader
+    readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result); // File content
+        reader.onerror = (e) => reject(e);
+        reader.readAsText(file); // Read as plain text
+      });
     },
   },
 
