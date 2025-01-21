@@ -1,60 +1,21 @@
 <!-- TransactionForm.vue -->
 <template>
-  <form @submit.prevent="handleSubmit" class=" flex flex-col gap-3">
+  <form @submit.prevent="handleSubmit" class=" flex flex-col gap-3 border p-12">
     <h2 class=" text-2xl font-bold">Add A New Transaction</h2>
      <!-- SELECT CUSTOMER -->
 
-  <div class=" flex flex-col gap-3 flex-wrap">
-      <div class=" w-fit">
-        <span>Select A Customer</span>
-        <Popover v-model:open="open">
-            <PopoverTrigger as-child>
-              <Button
-                variant="outline"
-                role="combobox"
-                :aria-expanded="open"
-                class="w-full p-3 justify-between uppercase"
-              >
-                {{ value ? customers.find((customer) => customer.name === value)?.name : 'Choose Customer to Deposit' }}
-
-                <i class=" bi bi-chevron-expand"></i>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-full p-0">
-              <Command v-model="value" class=" w-full">
-                <CommandInput placeholder="Search for customers by name" />
-                <CommandEmpty>No customers found</CommandEmpty>
-                <CommandList>
-                  <CommandGroup>
-                    <CommandItem
-                      v-for="item in customers"
-                      :key="item.name"
-                      :value="item.name"
-                      @select="[open = false, customer.id = item.id]"
-                      class="uppercase"
-                    >
-                      <i
-                        :class="cn(
-                          'mr-2 h-4 w-4 bi bi-check',
-                          value === item.name ? 'opacity-100' : 'opacity-0',
-                        )"
-                      />
-                      {{ item.name }}
-                    </CommandItem>
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-        </Popover>
+  <div class=" flex flex-row flex-wrap gap-3 items-end">
+      <div class=" w-fit flex flex-col gap-3">
+          <span>Select A Customer</span>
+          <select v-model="selectedCustomerId" required @change="selectCustomer" class=" p-3 border">
+            <option value="" disabled>Select customer here</option>
+            <option v-for="customer in customers" :key="customer.reg_no" :value="customer.id">
+              {{ customer.name }} ({{ customer.reg_number }})
+            </option>
+          </select>
       </div>
 
-<!--     <select v-model="id" required @change="selectCustomer">
-      <option v-for="customer in customers" :key="customer.reg_no" :value="customer.id">
-        {{ customer.name }} ({{ customer.reg_no }})
-      </option>
-    </select> -->
-
-    <div class=" flex flex-row gap-6">
+    <!-- <div class=" flex flex-row gap-6"> -->
       <div class=" flex flex-col gap-3 flex-1">
         <span class=" flex ">Select transaction type</span>
         <select v-model="transaction.type" required class=" p-3 border">
@@ -72,51 +33,14 @@
         <span class=" flex ">Transaction amount</span>
         <input v-model.number="transaction.amount" type="number" placeholder="Amount" required class=" p-3 border"/>
       </div>
-    </div>
-
+    <!-- </div> -->
+    <Button type="submit" class=" w-fit">Add Transaction</Button>
     
   </div>
-    <Button type="submit" class=" w-fit">Add Transaction</Button>
+   
   </form>
-  <div class=" flex flex-col gap-3" v-if="false">
-    <label class=" flex flex-row-reverse gap-3 border w-fit">
-      <span>Add bulk deposit transaction</span>
-      <input type="checkbox" v-model="bulk_transactions"/>
-    </label>
-  
-    <div v-if="bulk_transactions" class=" flex flex-col w-fit gap-3">
-      {{ selectedCustomerId }}<br/>
-      {{ bulk_transact }}
 
-      <!-- form -->
-     <!-- Form -->
-  <div>
-    <div class="flex flex-col w-fit">
-      <select v-model="selectedCustomerId" required @change="selectCustomer" class="border p-3">
-        <option value="" disabled>Select customer</option>
-        <option v-for="customer in customers" :key="customer.reg_no" :value="customer.id">
-          {{ customer.name }} ({{ customer.reg_no }})
-        </option>
-      </select>
-    </div>
-
-    <div class=" flex flex-row flex-wrap gap-6 mt-6">
-      <!-- Bulk Transaction Inputs -->
-      <div v-for="(transaction, index) in bulk_transact" :key="index" class="flex flex-col gap-3 max-w-[200px]">
-        <input v-model="transaction.date" type="date" required />
-        <input v-model.number="transaction.amount" type="number" placeholder="Amount" required />
-        <button @click="removeTransaction(index)" class="text-red-500">Remove</button>
-      </div>
-    </div>
-
-    <!-- Add/Submit Buttons -->
-    <div class="flex flex-row gap-3 mt-3">
-      <button @click="addTransaction" class="bg-blue-500 text-white p-2">Add Another Transaction</button>
-      <button @click="submitTransactions" class="bg-green-500 text-white p-2">Add Bulk Transaction</button>
-    </div>
-  </div>
-  </div>
-</div>
+<!-- {{ selectedCustomerId }} -->
 </template>
 
 <script>
@@ -202,6 +126,11 @@ export default {
       this.bulk_transact.splice(index, 1);
     },
 
+
+    selectCustomer(){
+      console.log("selected customer: ",  this.selectedCustomerId)
+    },
+
     submitTransactions() {
       if (!this.selectedCustomerId) {
         alert('Please select a customer.');
@@ -227,31 +156,26 @@ export default {
       // Reset the form
       this.bulk_transact = [{ date: '', amount: 0 }];
     },
+
+    handleSubmit () {
+      // Assign unique ID for the transaction
+      this.transaction.id = Date.now().toString();
+      this.transaction.time = new Date();
+
+      // Emit event with the selected customer ID and the transaction data
+      this.$emit('add-transaction', { customerId: this.selectedCustomerId, transaction: { ...this.transaction } });
+
+      // Reset form inputs for a new transaction
+      this.transaction = { id: '', type: 'deposit', date: '', amount: 0, time: '' };
+      this.selectedCustomerId = ''; // Reset selected customer
+    },
   },
 
   setup(props, { emit }) {
     const id = ref('');
     // defining transaction variable...
     const transaction = ref({ id: Date.now().toString(), type: 'deposit', date: '', amount: 0, time: '' });
-
-    const handleSubmit = () => {
-      // Assign unique ID for the transaction
-      transaction.value.id = Date.now().toString();
-      transaction.value.time = new Date();
-
-      // Emit event with the selected customer ID and the transaction data
-      emit('add-transaction', { customerId: id.value, transaction: { ...transaction.value } });
-
-      // Reset form inputs for a new transaction
-      transaction.value = { id: '', type: 'deposit', date: '', amount: 0, time: '' };
-      id.value = ''; // Reset selected customer
-    };
-
-    const selectCustomer = ()=>{
-      console.log("customer selected: ", id.value);
-    }
-
-    return { id, transaction, handleSubmit, selectCustomer };
+    return { id, transaction };
   },
 };
 </script>
