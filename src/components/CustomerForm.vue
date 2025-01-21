@@ -1,6 +1,41 @@
 <!-- CustomerForm.vue -->
 <template>
+   <!-- FORM -->
+   <form class=" flex flex-col w-full gap-3 mb-12" @submit.prevent="handleSubmit">
+            <!-- {{ customer }} -->
+      <h1 class=" text-2xl font-bold">Add a new customer</h1>
+      <div class=" flex flex-row gap-3">
+        <div class=" w-full flex-1">
+          <span>Customer name</span>
+          <input type="text" placeholder="Enter customer name here" class="p-3 w-full uppercase border" v-model="customer.name"/>
+        </div>
 
+        <div class=" flex flex-col">
+          <span>Reg. Number</span>
+          <input type="text" placeholder="Enter customer REG. number" class="p-3 uppercase w-[100px]" v-model="customer.reg_number"/>
+        </div>
+      </div>
+
+      <div class=" flex flex-row gap-3">
+        <div class=" w-full flex flex-col">
+          <span>Customer Address</span>
+          <input v-model="customer.address" placeholder="Address" required class=" p-3"/>
+        </div>
+
+        <div class=" w-full">
+          <span>Customer Phone Number</span>
+          <input type="phone" placeholder="Enter customer phone number" class="p-3 w-full uppercase" v-model="customer.phone"/>
+        </div>
+
+        <div class=" w-full">
+          <span>Customer Regsitration Date</span>
+          <input type="date" placeholder="Enter customer phone number" class="p-3 w-full uppercase" v-model="customer.reg_date"/>
+        </div>
+      </div>
+        <Button @click="handleSubmit()" class=" w-fit">+ Add new Customer</Button>
+        <hr/>
+    </form>
+   
 
  <!--    <form @submit.prevent="handleSubmit" class=" flex flex-col gap-3">
       <h2>Add Customer</h2>
@@ -22,13 +57,13 @@
             Add a new customer to record ledger record
           </span>
           <!-- ERROR ALERTS HERE -->
-          <Alert variant="destructive" v-if="error" class=" flex text-left flex-col justify-start">
+        <!--   <Alert variant="destructive" v-if="error" class=" flex text-left flex-col justify-start">
             <ExclamationTriangleIcon class="w-4 h-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>
               {{ error }}
             </AlertDescription>
-          </Alert>
+          </Alert> -->
   
           <!-- FORM -->
           <form class=" flex flex-col w-full gap-3" @submit.prevent="handleSubmit">
@@ -66,7 +101,15 @@
             <Button @click="[handleSubmit(), new_customer_modal = !new_customer_modal]">Add Customer</Button>
           </div>
         </div>
-    </div>
+      </div>
+
+     <!--  <div class=" my-12">
+        <Button @click="handleSubmit()">+ Add new Customer</Button>
+      </div> -->
+      
+
+
+ 
   </template>
   
   <script>

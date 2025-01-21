@@ -8,7 +8,7 @@ import NewApp from '@/views/NewApp.vue'
 
 const routes = [
   {
-    path: '/',
+    path: '/app-old',
     name: 'Dashboard',
     component: DashboardView,
   },
@@ -23,7 +23,7 @@ const routes = [
     component: LedgerGroup,
   },
   {
-    path: '/app',
+    path: '',
     name: 'New App',
     component: NewApp,
   }
