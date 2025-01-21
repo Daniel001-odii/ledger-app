@@ -1,6 +1,14 @@
 <template>
-    <div>
-        <h1 class=" font-bold text-4xl">Ledger for Group <span class=" uppercase">{{ this.$route.params.group }}</span></h1>
+<div>
+    <Button @click="$router.back()">
+        <i class=" bi bi-arrow-left"></i> Back
+    </Button>
+
+    <div class="" id="table">
+        <div class=" flex flex-row items-center justify-between  mt-12">
+            <h1 class=" font-bold text-4xl">Ledger for Group <span class=" uppercase">{{ this.$route.params.group }}</span></h1>
+            <Button variant="outline" @click="printSheet()"> <i class="bi bi-printer"></i> Print Sheet</Button>
+        </div>
 
         <div class=" flex mt-12">
             <table class=" border border-t mt-3" ref="printable_table" style=" margin-top: 5px;">
@@ -40,14 +48,17 @@
                     </td>
 
                     <td class="text-right border">
-                    {{ item.reg_date }}
+                    {{ item.reg_date || item.date }}
                     </td>
                 </tr>
     
                 <!-- </TableBody> -->
             </table>
         </div>
+        <!-- <customer-table v-if="customers" :customers="customers" /> -->
+         <!-- {{ customers }} -->
     </div>
+</div>
 </template>
 
 <script>
@@ -60,6 +71,8 @@
     TableHeader,
     TableRow,
   } from '@/components/ui/table'
+import Button from '@/components/ui/button/Button.vue';
+import CustomerTable from '@/components/CustomerTable';
 
     export default {
         components: {
@@ -70,6 +83,8 @@
         TableHead,
         TableHeader,
         TableRow,
+        Button,
+        CustomerTable,
         },
         data(){
             return{
@@ -86,6 +101,39 @@
                     customer.reg_number && customer.reg_number.startsWith(group)
                 );
             },
+
+        printSheet(){
+            const table = document.getElementById("table").outerHTML;
+            const print_window = window.open("", "_blank");
+            print_window.document.write(`
+                <html>
+                    <head>
+                        <title> Ledger Sheet for group ${this.group}</title>
+                    </head>
+                    <style>
+                     @page {
+                        size: landscape;
+                    }
+                        table{
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                        th, td {
+                        border: 1px solid black;
+                        padding: 8px;
+                    }
+                    </style>
+                    <body>
+                        <h3>Ledger Sheet for group ${this.group}</h3>
+                        ${table}
+                    </body>
+                </html>
+            `);
+            print_window.document.close();
+            print_window.focus();
+            print_window.print();
+            print_window.close();
+        },
     },
 
     mounted(){

@@ -941,8 +941,6 @@
 
                 return Array.from(groups).sort(); // Return sorted groups (e.g., ["A", "B", "C"])
             },
-
-  
       },
   
       computed: {

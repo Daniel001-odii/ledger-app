@@ -4,6 +4,8 @@ import DashboardView from '@/views/DashboardView.vue'
 
 import LedgerGroup from '@/views/LedgerGroup.vue'
 
+import NewApp from '@/views/NewApp.vue'
+
 const routes = [
   {
     path: '/',
@@ -19,6 +21,11 @@ const routes = [
     path: '/group/:group',
     name: 'Ledger Group',
     component: LedgerGroup,
+  },
+  {
+    path: '/app',
+    name: 'New App',
+    component: NewApp,
   }
 ]
 

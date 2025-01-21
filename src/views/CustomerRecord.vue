@@ -32,7 +32,7 @@
         <div class=" flex flex-row flex-wrap justify-between items-center border rounded-md p-5  mt-3">
             <div class=" flex flex-col">
                 <span class=" font-bold text-4xl">{{ customer.name }}</span> <br/>
-                <span>Phone: {{ customer.phone }} <br/> Address: {{ customer.address }} <br/> Reg.No: {{  customer.reg_number }}</span>
+                <span>Phone: {{ customer.phone }} <br/> Address: {{ customer.address }} <br/> Reg.No: {{  customer.reg_number }}<br/> Registration Date: {{ customer.reg_date || customer.date }}</span>
             </div>
             
             <Button variant="outline" @click="printSheet()"> <i class="bi bi-printer"></i> Print Sheet</Button>
@@ -64,11 +64,12 @@
                     </TableHead>
                     <TableHead class=" text-left border">Transaction type</TableHead>
                     <TableHead class=" text-right border">Amount (NGN)</TableHead>
-                    <TableHead class=" text-right border">Date-Time</TableHead>
+                    <TableHead class=" text-right border">Date</TableHead>
+                    <TableHead class=" text-right border">Actions</TableHead>
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                <TableRow v-for="(item, index) in transactions" :key="index"  @click="[transaction_edit_modal = !transaction_edit_modal, transaction = item]" class=" cursor-pointer">
+                <TableRow v-for="(item, index) in transactions" :key="index" class=" cursor-pointer">
                     <TableCell class="font-left border">
                     {{ index + 1 }}
                     </TableCell>
@@ -83,6 +84,20 @@
 
                     <TableCell class="text-right border">
                     {{ convertToReadableDateTime(item.date) }}
+                    </TableCell>
+
+                    <TableCell class=" text-right">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger>
+                            <button>
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                            <DropdownMenuItem @click="[transaction_edit_modal = !transaction_edit_modal, transaction = item]">Edit transaction</DropdownMenuItem>
+                            <DropdownMenuItem  @click="[delete_customer_modal = !delete_customer_modal, customer.id = item.id, customer.name = item.name]" class="bg-red-500 text-white">Delete transaction</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </TableCell>
                 </TableRow>
     
@@ -221,10 +236,10 @@
             this.getCustomerRecordsByWeek(this.customer_id);
             console.log(`Transaction ${transactionId} amount updated to ${newAmount}.`);
             return true;
-            },
+        },
 
 
-            printSheet(){
+        printSheet(){
             const table = document.getElementById("table").outerHTML;
             const print_window = window.open("", "_blank");
             print_window.document.write(`
@@ -257,112 +272,112 @@
             print_window.close();
         },
 
-            convertToReadableDateTime(isoDate) {
-                const date = new Date(isoDate);
+        convertToReadableDateTime(isoDate) {
+            const date = new Date(isoDate);
 
-                const options = {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    // hour: "2-digit",
-                    // minute: "2-digit",
-                    // second: "2-digit",
-                    // hour12: true,
-                };
+            const options = {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                // hour: "2-digit",
+                // minute: "2-digit",
+                // second: "2-digit",
+                // hour12: true,
+            };
 
-                return date.toLocaleString("en-US", options);
-            },
+            return date.toLocaleString("en-US", options);
+        },
 
-            getWeeklyWithdrawals(transactions = []) {
-                const withdrawals = transactions
-                    .filter((transaction) => transaction.type === "withdrawal")
-                    .map((transaction) => transaction.amount);
-        
-                // Ensure exactly two columns (withdrawals or dashes)
-                return [withdrawals[0] || "-", withdrawals[1] || "-"];
-            },
+        getWeeklyWithdrawals(transactions = []) {
+            const withdrawals = transactions
+                .filter((transaction) => transaction.type === "withdrawal")
+                .map((transaction) => transaction.amount);
+    
+            // Ensure exactly two columns (withdrawals or dashes)
+            return [withdrawals[0] || "-", withdrawals[1] || "-"];
+        },
   
 
-            getCustomerRecordsByWeek(customerId) {
-                const customers = JSON.parse(localStorage.getItem("customers")) || [];
-                const customer = customers.find((c) => c.id === customerId);
+        getCustomerRecordsByWeek(customerId) {
+            const customers = JSON.parse(localStorage.getItem("customers")) || [];
+            const customer = customers.find((c) => c.id === customerId);
 
-                if (!customer) {
-                    console.error("Customer not found");
-                    return null; // Return null or an empty object if the customer is not found
-                }
-
-                const transactions = customer.transactions || [];
-
-                let week;
-                // Group transactions by week
-                const recordsByWeek = transactions.reduce((result, transaction) => {
-                    week = this.getWeekNumber(new Date(transaction.date));
-                    if (!result[week]) {
-                    result[week] = [];
-                    }
-                    result[week].push(transaction);
-                    return result;
-                }, {});
-
-                // Return customer info along with weekly grouped transactions
-                this.customer = customer;
-                    // this.transactions = recordsByWeek[week];
-                    this.transactions = customer.transactions;
-                console.log("transactions: ", recordsByWeek);
-            },
-
-            getCustomerTransactionSummary(customerId) {
-                const customers = JSON.parse(localStorage.getItem("customers")) || [];
-                const customer = customers.find((c) => c.id === customerId);
-
-                if (!customer) {
+            if (!customer) {
                 console.error("Customer not found");
-                return null; // Return null if customer doesn't exist
+                return null; // Return null or an empty object if the customer is not found
+            }
+
+            const transactions = customer.transactions || [];
+
+            let week;
+            // Group transactions by week
+            const recordsByWeek = transactions.reduce((result, transaction) => {
+                week = this.getWeekNumber(new Date(transaction.date));
+                if (!result[week]) {
+                result[week] = [];
                 }
+                result[week].push(transaction);
+                return result;
+            }, {});
 
-                const transactions = customer.transactions || [];
+            // Return customer info along with weekly grouped transactions
+            this.customer = customer;
+                // this.transactions = recordsByWeek[week];
+                this.transactions = customer.transactions;
+            console.log("transactions: ", recordsByWeek);
+        },
 
-                // Calculate totals and counts for deposits and withdrawals
-                const summary = transactions.reduce(
-                (acc, transaction) => {
-                    if (transaction.type === "deposit") {
-                    acc.totalDeposits += transaction.amount;
-                    acc.depositTimes += 1;
-                    } else if (transaction.type === "withdrawal") {
-                    acc.totalWithdrawals += transaction.amount;
-                    acc.withdrawTimes += 1;
-                    }
-                    return acc;
-                },
-                {
-                    totalDeposits: 0,
-                    depositTimes: 0,
-                    totalWithdrawals: 0,
-                    withdrawTimes: 0,
+        getCustomerTransactionSummary(customerId) {
+            const customers = JSON.parse(localStorage.getItem("customers")) || [];
+            const customer = customers.find((c) => c.id === customerId);
+
+            if (!customer) {
+            console.error("Customer not found");
+            return null; // Return null if customer doesn't exist
+            }
+
+            const transactions = customer.transactions || [];
+
+            // Calculate totals and counts for deposits and withdrawals
+            const summary = transactions.reduce(
+            (acc, transaction) => {
+                if (transaction.type === "deposit") {
+                acc.totalDeposits += transaction.amount;
+                acc.depositTimes += 1;
+                } else if (transaction.type === "withdrawal") {
+                acc.totalWithdrawals += transaction.amount;
+                acc.withdrawTimes += 1;
                 }
-                );
-
-               /*  return {
-                customerInfo: {
-                    id: customer.id,
-                    name: customer.name,
-                    balance: customer.balance,
-                },
-                summary,
-                }; */
-                this.summary = summary;
+                return acc;
             },
+            {
+                totalDeposits: 0,
+                depositTimes: 0,
+                totalWithdrawals: 0,
+                withdrawTimes: 0,
+            }
+            );
+
+            /*  return {
+            customerInfo: {
+                id: customer.id,
+                name: customer.name,
+                balance: customer.balance,
+            },
+            summary,
+            }; */
+            this.summary = summary;
+        },
 
 
                 // Helper Method: Get Week Number for a Date
-            getWeekNumber(date) {
-                const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-                const pastDaysOfYear =
-                    (date - firstDayOfYear + (firstDayOfYear.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000) /
-                    86400000;
-                return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-            },
+        getWeekNumber(date) {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear =
+                (date - firstDayOfYear + (firstDayOfYear.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000) /
+                86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        },
 
           
 
