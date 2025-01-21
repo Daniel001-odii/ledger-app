@@ -46,10 +46,14 @@
   
   
   
-  <div class=" mt-12">
-    <h2 class=" font-bold text-3xl">Customers and Transactions</h2>
+  <div class=" mt-12" id="table">
+    <div class=" flex flex-row items-center justify-between">
+      <h2 class=" font-bold text-3xl">Customers and Transactions</h2>
+      <Button variant="outline" @click="printSheet"> <i class="bi bi-printer"></i> Print Sheet</Button>
+    </div>
+  
 
-    <div class=" flex flex-row items-center justify-between py-6">
+    <div class=" flex flex-row items-center justify-between py-6" >
       <h3 class=" font-bold text-3xl">Week: {{ groupedTransactions[current_week]?.startDate }} - {{ groupedTransactions[current_week]?.endDate }}</h3>
       <div class=" flex flex-row gap-4">
         <Button @click="[current_week --, changeCurrentWeek(current_week)]" :disabled="current_week == 0">Previous</Button>
@@ -163,6 +167,7 @@ export default {
               }
             ]
           },
+          selectedWeek: `${this.groupedTransactions[this.current_week]?.startDate } - ${ this.groupedTransactions[this.current_week]?.endDate }`,
       edit_customer_modal: false,
       delete_customer_modal: false,
     }
@@ -246,6 +251,39 @@ export default {
         localStorage.setItem("current_week", week);
       }
     },
+
+    printSheet(){
+            const table = document.getElementById("table").outerHTML;
+            const print_window = window.open("", "_blank");
+            print_window.document.write(`
+                <html>
+                    <head>
+                        <title>Ledger Record For Week ${this.groupedTransactions[this.current_week]?.startDate } - ${ this.groupedTransactions[this.current_week]?.endDate }</title>
+                    </head>
+                    <style>
+                     @page {
+                        size: landscape;
+                    }
+                        table{
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                        th, td {
+                        border: 1px solid black;
+                        padding: 8px;
+                    }
+                    </style>
+                    <body>
+                        <h3>Ledger Record for week ${this.groupedTransactions[this.current_week]?.startDate } - ${ this.groupedTransactions[this.current_week]?.endDate }</h3>
+                        ${table}
+                    </body>
+                </html>
+            `);
+            print_window.document.close();
+            print_window.focus();
+            print_window.print();
+            print_window.close();
+        },
   },
 
 
