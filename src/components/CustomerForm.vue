@@ -1,7 +1,7 @@
 <!-- CustomerForm.vue -->
 <template>
    <!-- FORM -->
-   <form class=" flex flex-col w-full gap-3 mb-12" @submit.prevent="handleSubmit">
+   <form v-if="false" class=" flex flex-col w-full gap-3 mb-12" @submit.prevent="handleSubmit">
             <!-- {{ customer }} -->
       <h1 class=" text-2xl font-bold">Add a new customer</h1>
       <div class=" flex flex-row gap-3">
@@ -103,9 +103,9 @@
         </div>
       </div>
 
-     <!--  <div class=" my-12">
-        <Button @click="handleSubmit()">+ Add new Customer</Button>
-      </div> -->
+      <div class=" my-12">
+        <Button @click="new_customer_modal = !new_customer_modal">+ Add new Customer</Button>
+      </div>
       
 
 
@@ -133,8 +133,9 @@ import Button from './ui/button/Button.vue';
           reg_number: '', 
           reg_date: '01-10-2025', 
           balance: 0,
-          new_customer_modal: false,
         },
+
+        new_customer_modal: false,
 
        
         alphs: ["a", 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
@@ -175,8 +176,10 @@ import Button from './ui/button/Button.vue';
           address: '',
           reg_number: '',
           reg_date: '01-10-2025',
-          balance: '',
-        }
+          balance: 0,
+        };
+
+        window.location.reload();
       },
 
       // cehck and auto apply next reg_number...

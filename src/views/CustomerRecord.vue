@@ -129,7 +129,7 @@
        
        
     </div>
-    {{ customer }}
+    <!-- {{ customer }} -->
 </template>
 
 <script>

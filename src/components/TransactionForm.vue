@@ -162,7 +162,8 @@ export default {
       bulk_transactions: false,
       no_of_transactions: 2,
       numbers: [2,3,4,5,6],
-
+      open: false,
+      value: '',
       selectedCustomerId: '', // Currently selected customer
       bulk_transact: [
         { id: Date.now().toString(), 
