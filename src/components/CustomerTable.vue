@@ -24,6 +24,11 @@
               <span>Customer Phone Number</span>
               <input type="phone" placeholder="Enter customer phone number" class="p-3 w-full uppercase" v-model="customer.phone"/>
             </div>
+
+            <div class=" w-full">
+              <span>Customer Balance</span>
+              <input type="number" placeholder="Enter customer balance here" class="p-3 w-full uppercase" v-model="customer.balance"/>
+            </div>
             <div class="flex flex-row gap-3 justify-end items-center">
             <Button variant="destructive" @click="[edit_customer_modal = !edit_customer_modal, error = '']">Close</Button>
             <Button @click="editCustomer(customer.id)">Save changes</Button>

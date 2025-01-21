@@ -48,6 +48,8 @@
       </div>
     </div>
     <customer-table :customers="customers" />
+    <Button @click="saveLocalStorageToFile">Download File</Button>
+ 
   </div>
 </template>
 
@@ -121,6 +123,33 @@ export default {
         customers,     // Array of all customers
         totalBalance,  // Total balance across all customers
       }; */
+    },
+
+    saveLocalStorageToFile() {
+      // Step 1: Get all data from localStorage
+      const localStorageData = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        localStorageData[key] = localStorage.getItem(key);
+      }
+
+      // Step 2: Convert the data to a JSON string
+      const jsonData = JSON.stringify(localStorageData, null, 2);
+
+      // Step 3: Create a Blob and generate a download link
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      // Step 4: Create a temporary link element
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ledger-app-file.json"; // Set the file name
+      document.body.appendChild(link);
+      link.click();
+
+      // Step 5: Clean up the link
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     },
   },
 
