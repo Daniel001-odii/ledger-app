@@ -126,7 +126,7 @@ export default {
       }; */
     },
 
-    saveLocalStorageToFile() {
+    saveLocalStorageToFileOld() {
       // Step 1: Get all data from localStorage
       const localStorageData = {};
       for (let i = 0; i < localStorage.length; i++) {
@@ -153,30 +153,78 @@ export default {
       URL.revokeObjectURL(url);
     },
 
-    async uploadToLocalStorage(event) {
+    saveLocalStorageToFile() {
+      // Step 1: Get the data for the "customers" key from localStorage
+      const customersData = localStorage.getItem("customers");
+
+      if (!customersData) {
+        alert("No data found for 'customers' in localStorage.");
+        return;
+      }
+
+      // Step 2: Convert the data to a JSON string (if it's not already a string)
+      const jsonData = JSON.stringify(JSON.parse(customersData), null, 2);
+
+      // Step 3: Create a Blob and generate a download link
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      // Step 4: Create a temporary link element
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "customers-data.json"; // Set the file name
+      document.body.appendChild(link);
+      link.click();
+
+      // Step 5: Clean up the link
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    },
+
+
+    uploadToLocalStorage(event) {
       const file = event.target.files[0]; // Get the uploaded file
 
       if (file) {
         try {
           // Step 1: Read the file content
-          const fileContent = await this.readFile(file);
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              // Step 2: Parse the JSON content
+              const data = JSON.parse(e.target.result);
 
-          // Step 2: Parse the JSON data
-          const data = JSON.parse(fileContent);
+              // Step 3: Validate the data structure (ensure it fits the "customers" format)
+              if (typeof data === "object" && data !== null) {
+                // Save to localStorage under the "customers" key
+                localStorage.setItem("customers", JSON.stringify(data));
+                alert("'customers' data has been successfully restored to localStorage!");
+                window.location.reload();
+              } else {
+                alert("Invalid file format. Please upload a valid JSON file.");
+              }
+            } catch (parseError) {
+              console.error("Error parsing the file:", parseError);
+              alert("Failed to parse the file. Ensure it contains valid JSON.");
+            }
+          };
 
-          // Step 3: Save each key-value pair to localStorage
-          Object.keys(data).forEach((key) => {
-            localStorage.setItem(key, data[key]);
-          });
+          reader.onerror = (readError) => {
+            console.error("Error reading the file:", readError);
+            alert("Failed to read the file. Please try again.");
+          };
 
-          alert("Data has been successfully restored to localStorage!");
-          window.location.reload();
+          // Read the file content as text
+          reader.readAsText(file);
         } catch (error) {
-          console.error("Error reading or parsing the file:", error);
-          alert("Failed to upload and restore data. Please check the file format.");
+          console.error("Error uploading the file:", error);
+          alert("An error occurred while uploading the file.");
         }
+      } else {
+        alert("No file selected. Please choose a file to upload.");
       }
     },
+
 
     // Helper method to read the file using FileReader
     readFile(file) {

@@ -409,6 +409,7 @@
 
             // Remove the transaction by its index
             this.customer.transactions.splice(transactionIndex, 1);
+            this.customer.balance = this.customer.balance - transaction_amount;
 
             // Retrieve all customers from localStorage
             const customers = JSON.parse(localStorage.getItem('customers')) || [];
