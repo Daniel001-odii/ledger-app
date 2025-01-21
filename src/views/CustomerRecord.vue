@@ -100,7 +100,7 @@
                     </TableCell>
 
                     <TableCell class="text-right border">
-                    {{ convertToReadableDateTime(item.date) }}
+                    {{ item.date }}
                     </TableCell>
 
                     <TableCell class=" text-right">
