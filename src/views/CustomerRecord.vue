@@ -25,6 +25,23 @@
       </div>
     </div>
 
+       <!-- DELTE TRANSACTION MODAL -->
+       <div v-show="delete_transaction_modal" class=" fixed top-0 left-0 bg-black w-full min-h-screen z-50 backdrop-blur-sm  bg-opacity-50 flex justify-center items-center p-5">
+      <div class=" max-w-[700px] bg-white rounded-lg flex flex-col gap-3 p-8 w-full">
+        <h1 class=" font-bold text-2xl">Are your sure you want to delete the transaction? <br/> </h1>
+        <div class=" flex flex-row gap-3">
+            {{ transaction.type }}<br/>
+            {{ transaction.date }}<br/>
+            {{ transaction.amount }}
+            
+        </div>
+          <div class="flex flex-row gap-3 justify-end items-center">
+            <Button variant="destructive" @click="[delete_transaction_modal = !delete_transaction_modal, error = '']">Close</Button>
+            <Button @click="[deleteTransaction(transaction.id), delete_transaction_modal = !delete_transaction_modal]">Yes Delete</Button>
+            </div>
+      </div>
+    </div>
+
 
     <div id="table">
         <!-- <h1>All Record for {{ customer.name }}</h1>  -->
@@ -95,7 +112,7 @@
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                             <DropdownMenuItem @click="[transaction_edit_modal = !transaction_edit_modal, transaction = item]">Edit transaction</DropdownMenuItem>
-                            <DropdownMenuItem  @click="[delete_customer_modal = !delete_customer_modal, customer.id = item.id, customer.name = item.name]" class="bg-red-500 text-white">Delete transaction</DropdownMenuItem>
+                            <DropdownMenuItem  @click="[delete_transaction_modal = !delete_transaction_modal, transaction = item]" class="bg-red-500 text-white">Delete transaction</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </TableCell>
@@ -112,6 +129,7 @@
        
        
     </div>
+    {{ customer }}
 </template>
 
 <script>
@@ -156,7 +174,7 @@
         data() {
             return {
                 customer_id: this.$route.params.customer_id,
-                transactions: '',
+                transactions: [],
                 customer: {
                     id: '',
                     name: '',
@@ -188,7 +206,8 @@
                     amount: '',
                     date: '',
                     customer_id: ''
-                }
+                },
+                delete_transaction_modal: false,
             }
         },
         methods: {
@@ -377,6 +396,36 @@
                 (date - firstDayOfYear + (firstDayOfYear.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000) /
                 86400000;
             return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        },
+
+        deleteTransaction(transactionId) {
+            // Ensure the transaction exists in the customer's transaction list
+            const transactionIndex = this.customer.transactions.findIndex(t => t.id === transactionId);
+
+            if (transactionIndex === -1) {
+                console.warn(`Transaction with ID ${transactionId} not found.`);
+                return;
+            }
+
+            // Remove the transaction by its index
+            this.customer.transactions.splice(transactionIndex, 1);
+
+            // Retrieve all customers from localStorage
+            const customers = JSON.parse(localStorage.getItem('customers')) || [];
+
+            // Find the customer in the localStorage data
+            const customerIndex = customers.findIndex(c => c.id === this.customer.id);
+            if (customerIndex !== -1) {
+                // Update the customer data
+                customers[customerIndex] = this.customer;
+
+                // Persist the updated customers data back to localStorage
+                localStorage.setItem('customers', JSON.stringify(customers));
+
+                console.log(`Transaction with ID ${transactionId} deleted successfully.`, this.customer);
+            } else {
+                console.warn(`Customer with ID ${this.customer.id} not found in localStorage.`);
+            }
         },
 
           
