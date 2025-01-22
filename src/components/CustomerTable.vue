@@ -46,9 +46,6 @@
       </div>
     </div>
   </div>
-
-
-  
   
   
   <div class=" mt-12" id="table">
@@ -87,7 +84,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in customers" :key="customer.id" class=" text-left">
+          <tr v-for="(item, index) in customers" :key="customer.id" class=" text-left hover:bg-gray-100">
             <td>{{ index + 1 }}</td>
             <td class=" text-left">
               <RouterLink  :to="`/customers/${item.id}`" class=" hover:underline hover:text-blue-500">
@@ -122,6 +119,9 @@
         </tbody>
       </table>
     </div>
+
+    <!-- DAILY BALANCES -->
+    <DailyBalances :daily-balances="getDailyBalancesFromLocalStorage()"/>
   </div>
 </template>
 
@@ -136,7 +136,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from '@/components/ui/dropdown-menu'
-
+import DailyBalances from './DailyBalances.vue';
 
 export default {
   name: 'CustomerTable',
@@ -150,6 +150,7 @@ export default {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DailyBalances,
   },
 
   data(){
@@ -288,7 +289,49 @@ export default {
             print_window.focus();
             print_window.print();
             print_window.close();
-        },
+      },
+
+    getDailyBalancesFromLocalStorage() {
+    // Retrieve customers data from localStorage
+    const customersData = JSON.parse(localStorage.getItem('customers')) || [];
+
+    const dailyBalances = {};
+
+    // Calculate daily balances
+    customersData.forEach((customer) => {
+      customer.transactions.forEach((transaction) => {
+        const transactionDate = transaction.date; // Assuming `date` is in "YYYY-MM-DD"
+
+        if (!dailyBalances[transactionDate]) {
+          dailyBalances[transactionDate] = 0; // Initialize the balance for this date
+        }
+
+        // Update the balance: Add for deposits, subtract for withdrawals
+        if (transaction.type === 'deposit') {
+          dailyBalances[transactionDate] += transaction.amount;
+        } else if (transaction.type === 'withdrawal') {
+          dailyBalances[transactionDate] -= transaction.amount;
+        }
+      });
+    });
+
+    // Convert the object to an array, sort by date, and then convert back to an object
+    const sortedDailyBalances = Object.entries(dailyBalances)
+      .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB)) // Sort by date
+      .reduce((acc, [date, balance]) => {
+        acc[date] = balance;
+        return acc;
+      }, {});
+
+    return sortedDailyBalances;
+  },
+
+
+  },
+
+  computed: {
+
+
   },
 
 

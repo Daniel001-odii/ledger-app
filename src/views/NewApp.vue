@@ -48,8 +48,15 @@
       </div>
     </div>
     <customer-table :customers="customers" />
-    <input type="file" @change="uploadToLocalStorage" accept=".json" />
-    <Button @click="saveLocalStorageToFile">Download File</Button>
+
+    <div class=" flex flex-col gap-3 mt-12">
+      <span class=" text-2xl font-bold">Load and Save file</span>
+
+      <div class=" flex flex-row gap-3">
+        <input type="file" @change="uploadToLocalStorage" accept=".json" />
+        <Button @click="saveLocalStorageToFile">Download File</Button>
+      </div>
+    </div>
  
   </div>
 </template>
@@ -234,6 +241,27 @@ export default {
         reader.onerror = (e) => reject(e);
         reader.readAsText(file); // Read as plain text
       });
+    },
+
+    getDailyBalances(transactions) {
+      const dailyBalances = {};
+
+      transactions.forEach((transaction) => {
+        const transactionDate = transaction.date; // Assuming `date` is in a standard format like "YYYY-MM-DD"
+
+        if (!dailyBalances[transactionDate]) {
+          dailyBalances[transactionDate] = 0; // Initialize the balance for this date
+        }
+
+        // Update the balance: Add for deposits, subtract for withdrawals
+        if (transaction.type === 'deposit') {
+          dailyBalances[transactionDate] += transaction.amount;
+        } else if (transaction.type === 'withdrawal') {
+          dailyBalances[transactionDate] -= transaction.amount;
+        }
+      });
+
+      return dailyBalances;
     },
   },
 
